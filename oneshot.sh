@@ -68,6 +68,7 @@ done
 curl -fsS "http://127.0.0.1:${PORT}/api/v1/health"
 echo
 echo "Dashboard   http://127.0.0.1:${PORT}/"
+echo "Walkthrough https://github.com/drowzeys/keys-CyboPal-ONE-Hermes-DevKit-LiveSimulator-Nemotron3Nano-Omni-for-DGX-Spark/releases/download/v0.1.0/CyboPal-ONE-Simulator.mov"
 echo
 echo "Program it:"
 echo "  ./scripts/cybopal.sh mode sit"
