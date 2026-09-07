@@ -11,6 +11,17 @@ Program, test, and control a **CyboPal ONE** before the USB-C robot lands on the
 [download](https://github.com/drowzeys/keys-CyboPal-ONE-Hermes-DevKit-LiveSimulator-Nemotron3Nano-Omni-for-DGX-Spark/releases/download/v0.1.0/simplescreenrecorder.mp4)
 
 ```bash
+docker run --rm --network host \
+  ghcr.io/drowzeys/keys-cybopal-one-hermes-devkit:0.1.0
+# open http://127.0.0.1:5000/
+```
+
+Same image, long GHCR name (matches this repo):
+`ghcr.io/drowzeys/keys-cybopal-one-hermes-devkit-livesimulator-nemotron3nano-omni-for-dgx-spark:0.1.0`
+
+From git (venv fallback if you have no Docker):
+
+```bash
 git clone https://github.com/drowzeys/keys-CyboPal-ONE-Hermes-DevKit-LiveSimulator-Nemotron3Nano-Omni-for-DGX-Spark
 cd keys-CyboPal-ONE-Hermes-DevKit-LiveSimulator-Nemotron3Nano-Omni-for-DGX-Spark
 ./oneshot.sh
@@ -23,6 +34,7 @@ cd keys-CyboPal-ONE-Hermes-DevKit-LiveSimulator-Nemotron3Nano-Omni-for-DGX-Spark
 | **Hermes** | `agent_core.py` — JPEG in, `update_cybopal_state` tool out |
 | **Omni** | [`nvidia/Nemotron-3-Nano-Omni-30B-A3B-Reasoning-NVFP4`](https://huggingface.co/nvidia/Nemotron-3-Nano-Omni-30B-A3B-Reasoning-NVFP4) via vLLM |
 | **Hardware** | 1× DGX Spark GB10 (or any box with Python 3.12 + a browser) |
+| **Prebuilt image** | `ghcr.io/drowzeys/keys-cybopal-one-hermes-devkit:0.1.0` (linux/arm64) |
 | **GPU** | Optional. Dashboard + skills + follow **do not** need a model |
 | **GMU cap** | **≤ 0.85** — never raise `--gpu-memory-utilization` |
 
@@ -30,9 +42,22 @@ cd keys-CyboPal-ONE-Hermes-DevKit-LiveSimulator-Nemotron3Nano-Omni-for-DGX-Spark
 
 ## One-shot
 
+Prebuilt **linux/arm64** image (DGX Spark / GB10). Simulator needs **no GPU**. Omni weights are **not** in the image (~20 GB on Hugging Face).
+
 ```bash
-./oneshot.sh            # venv, deps, simulator on :5000
-./oneshot.sh --agent    # same + Hermes demo tracker (no GPU)
+docker pull ghcr.io/drowzeys/keys-cybopal-one-hermes-devkit:0.1.0
+docker run --rm --network host ghcr.io/drowzeys/keys-cybopal-one-hermes-devkit:0.1.0
+# same container + Hermes demo tracker:
+docker run --rm --network host -e CYBOPAL_AGENT=1 \
+  ghcr.io/drowzeys/keys-cybopal-one-hermes-devkit:0.1.0
+```
+
+`./oneshot.sh` pulls that image when Docker is present, otherwise a venv:
+
+```bash
+./oneshot.sh            # dashboard on :5000
+./oneshot.sh --agent    # dashboard + Hermes demo tracker
+./oneshot.sh --local    # skip docker, use ./venv
 ./oneshot.sh --omni     # print the vLLM command; does not occupy the GPU
 ```
 

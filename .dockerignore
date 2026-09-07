@@ -1,0 +1,9 @@
+.git
+.gitignore
+.venv
+cybo_env
+__pycache__
+*.pyc
+*.log
+video
+.grok/tmp

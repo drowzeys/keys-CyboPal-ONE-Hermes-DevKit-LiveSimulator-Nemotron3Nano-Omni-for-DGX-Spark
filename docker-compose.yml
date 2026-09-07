@@ -1,0 +1,26 @@
+# One-shot live simulator. Omni stays a separate GPU process (weights not in this image).
+#
+#   docker compose up
+#   docker compose --profile agent up
+#   open http://127.0.0.1:5000/
+
+name: cybopal-hermes-devkit
+
+services:
+  sim:
+    image: ${CYBOPAL_IMAGE:-ghcr.io/drowzeys/keys-cybopal-one-hermes-devkit:0.1.0}
+    build: .
+    container_name: cybopal-sim
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      PORT: "5000"
+
+  agent:
+    image: ${CYBOPAL_IMAGE:-ghcr.io/drowzeys/keys-cybopal-one-hermes-devkit:0.1.0}
+    container_name: cybopal-agent
+    network_mode: host
+    profiles: ["agent"]
+    depends_on:
+      - sim
+    entrypoint: ["python", "/app/agent_core.py", "--mode", "demo"]
