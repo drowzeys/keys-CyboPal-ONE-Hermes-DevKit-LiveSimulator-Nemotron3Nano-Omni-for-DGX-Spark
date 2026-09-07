@@ -1,0 +1,13 @@
+{
+  "name": "wave-hello",
+  "description": "Wave the 27-inch panel, greet on Pauli, then return to follow.",
+  "steps": [
+    {
+      "mode": "wave",
+      "pauli_text": "HELLO",
+      "display_markdown": "# Hello\n\nCyboPal ONE waving in. Hermes DevKit is live on this Spark."
+    },
+    { "sleep": 4.0 },
+    { "mode": "tracking", "pauli_text": "FOLLOW" }
+  ]
+}

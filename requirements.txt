@@ -1,0 +1,8 @@
+fastapi>=0.115
+uvicorn[standard]>=0.30
+opencv-python-headless>=4.8
+numpy>=1.26
+pydantic>=2.6
+openai>=1.40
+httpx>=0.27
+markdown-it-py>=3.0

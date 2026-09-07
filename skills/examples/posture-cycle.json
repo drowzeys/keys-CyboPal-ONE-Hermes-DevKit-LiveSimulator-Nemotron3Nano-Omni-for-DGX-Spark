@@ -1,0 +1,25 @@
+{
+  "name": "posture-cycle",
+  "description": "Sit → stand → recline → follow. Use this to test presets before hardware arrives.",
+  "steps": [
+    {
+      "mode": "sit",
+      "pauli_text": "SIT",
+      "display_markdown": "# Sit\nUpright working height. 190 mm column, 300 mm reach."
+    },
+    { "sleep": 2.5 },
+    {
+      "mode": "stand",
+      "pauli_text": "STAND",
+      "display_markdown": "# Stand\nColumn up to 400 mm. Screen tilts to a standing operator."
+    },
+    { "sleep": 2.5 },
+    {
+      "mode": "recline",
+      "pauli_text": "RECLINE",
+      "display_markdown": "# Recline\nArm reaches out and the panel tilts to a laid-back face."
+    },
+    { "sleep": 2.5 },
+    { "mode": "tracking", "pauli_text": "FOLLOW" }
+  ]
+}

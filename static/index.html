@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CyboPal ONE — Simulator</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <span class="mark"></span>
+      <div>
+        <h1>CyboPal ONE</h1>
+        <p>Desktop robotic terminal · hardware simulator</p>
+      </div>
+    </div>
+    <div class="status-pill" id="conn">connecting</div>
+  </header>
+
+  <nav class="modes" id="modes">
+    <button data-mode="tracking">Follow</button>
+    <button data-mode="sit">Sit</button>
+    <button data-mode="stand">Stand</button>
+    <button data-mode="recline">Recline</button>
+    <button data-mode="meeting">Meeting</button>
+    <button data-mode="wave">Wave</button>
+    <button data-mode="stow">Stow</button>
+    <button data-mode="idle">Idle</button>
+    <button data-mode="estop" class="danger">E-Stop</button>
+  </nav>
+
+  <main class="grid">
+    <section class="stage-wrap">
+      <canvas id="stage" width="960" height="620"></canvas>
+      <div class="legend">
+        <span><i class="dot arm"></i>6-DOF arm</span>
+        <span><i class="dot user"></i>simulated user</span>
+        <span><i class="dot screen"></i>27″ main + Pauli</span>
+      </div>
+    </section>
+
+    <aside class="side">
+      <div class="panel">
+        <h2>Telemetry</h2>
+        <div class="meters" id="meters"></div>
+      </div>
+      <div class="displays">
+        <div class="pauli">
+          <div class="bezel-label">Pauli 3.5″</div>
+          <div class="pauli-glass" id="pauli">READY</div>
+        </div>
+        <div class="main-screen">
+          <div class="bezel-label">27″ main display</div>
+          <div class="glass" id="main-md"></div>
+        </div>
+      </div>
+    </aside>
+
+    <section class="cams">
+      <figure>
+        <figcaption>Bezel camera</figcaption>
+        <img id="cam-bezel" alt="Bezel camera" src="/api/v1/camera/bezel.mjpeg" />
+      </figure>
+      <figure>
+        <figcaption>Base camera</figcaption>
+        <img id="cam-base" alt="Base camera" src="/api/v1/camera/base.mjpeg" />
+      </figure>
+    </section>
+
+    <section class="log-wrap">
+      <h2>Action log</h2>
+      <ol id="log"></ol>
+    </section>
+  </main>
+
+  <footer class="manual">
+    <h2>Manual joints</h2>
+    <div class="sliders" id="sliders"></div>
+    <button id="nudge" type="button">Send pose</button>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

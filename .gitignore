@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+.venv/
+cybo_env/
+*.log
+.DS_Store
+.grok/tmp/

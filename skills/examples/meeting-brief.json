@@ -1,0 +1,11 @@
+{
+  "name": "meeting-brief",
+  "description": "Park in meeting pose and push a markdown brief onto the 27-inch canvas.",
+  "steps": [
+    {
+      "mode": "meeting",
+      "pauli_text": "MEET",
+      "display_markdown": "# Meeting\n\n- Camera: bezel + base live\n- Pose: slight yaw toward guest chair\n- Hermes is listening for the next tool call\n"
+    }
+  ]
+}
