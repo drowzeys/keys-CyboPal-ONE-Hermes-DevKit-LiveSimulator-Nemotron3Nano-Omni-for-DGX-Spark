@@ -6,10 +6,6 @@ Program, test, and control a **CyboPal ONE** before the USB-C robot lands on the
 
 [CyboPal ONE](https://cybopal.com/) is a 27″ 4K display on a 6-DOF arm (700 mm reach) with a 3.5″ Pauli companion, dual cameras, follow, and gesture. There is **no public SDK yet**. This repo freezes the REST contract so Hermes work done today maps onto the hardware later.
 
-**Walkthrough (55 s, SimpleScreenRecorder):**
-[play in repo](video/simplescreenrecorder.mp4) ·
-[download](https://github.com/drowzeys/keys-CyboPal-ONE-Hermes-DevKit-LiveSimulator-Nemotron3Nano-Omni-for-DGX-Spark/releases/download/v0.1.0/simplescreenrecorder.mp4)
-
 ```bash
 docker run --rm --network host \
   ghcr.io/drowzeys/keys-cybopal-one-hermes-devkit:0.1.0
