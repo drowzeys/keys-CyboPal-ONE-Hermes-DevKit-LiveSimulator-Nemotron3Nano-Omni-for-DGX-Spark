@@ -62,17 +62,31 @@ function syncSliderLabels() {
   }
 }
 
+function tables(html) {
+  // simple pipe tables: a header row, a |---| separator, then rows
+  return html.replace(/((?:^\|.*\|[ \t]*(?:\n|$))+)/gm, (block) => {
+    const rows = block.trim().split("\n").map((r) => r.trim().replace(/^\||\|$/g, "").split("|").map((c) => c.trim()));
+    if (rows.length < 2 || !rows[1].every((c) => /^:?-{2,}:?$/.test(c))) return block;
+    const head = `<tr>${rows[0].map((c) => `<th>${c}</th>`).join("")}</tr>`;
+    const body = rows.slice(2).map((r) => `<tr>${r.map((c) => `<td>${c}</td>`).join("")}</tr>`).join("");
+    return `<table>${head}${body}</table>\n`;
+  });
+}
+
 function md(src) {
   const esc = (s) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
-  return esc(src || "")
+  return tables(esc(src || ""))
     .replace(/^### (.*)$/gm, "<h3>$1</h3>")
     .replace(/^## (.*)$/gm, "<h2>$1</h2>")
     .replace(/^# (.*)$/gm, "<h1>$1</h1>")
     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/(^|[^*])\*([^*\n]+)\*/g, "$1<em>$2</em>")
+    .replace(/^\d+\. (.*)$/gm, "<li>$1</li>")
     .replace(/^- (.*)$/gm, "<li>$1</li>")
     .replace(/(<li>.*<\/li>\n?)+/g, (m) => `<ul>${m}</ul>`)
     .replace(/\n{2,}/g, "<p></p>")
-    .replace(/\n/g, "<br/>");
+    .replace(/\n/g, "<br/>")
+    .replace(/<\/table><br\/>/g, "</table>");
 }
 
 function renderLog() {

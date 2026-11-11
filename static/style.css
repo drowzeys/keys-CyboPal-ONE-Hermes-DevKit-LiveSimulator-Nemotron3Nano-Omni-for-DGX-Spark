@@ -127,3 +127,6 @@ h2 { margin: 0 0 10px; font-size: 12px; letter-spacing: 0.14em; text-transform: 
 
 .glass .media { display: block; width: 100%; max-height: 360px; object-fit: contain; border-radius: 8px; background: #000; }
 .glass .media-caption { margin-top: 8px; color: var(--muted); font-size: 13px; }
+.glass table { border-collapse: collapse; margin: 4px 0 8px; font-size: 13px; }
+.glass th, .glass td { padding: 2px 10px 2px 0; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.glass th { color: var(--accent-2); font-weight: 600; }
