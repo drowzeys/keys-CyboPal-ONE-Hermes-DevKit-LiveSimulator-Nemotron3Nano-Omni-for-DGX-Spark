@@ -243,7 +243,20 @@ function applySnapshot(s) {
   state.events = s.events || [];
   state.arm_coordinates = s.arm_coordinates || {};
   pauliEl.textContent = state.pauli_text;
-  mdEl.innerHTML = md(state.display_markdown);
+  // a picture or video replaces the markdown; re-render only when it changes, so a video keeps playing
+  const media = s.display_media;
+  const key = media ? `media:${media.id}` : `md:${state.display_markdown}`;
+  if (key !== mdEl.dataset.key) {
+    mdEl.dataset.key = key;
+    if (media) {
+      const cap = media.caption ? `<div class="media-caption">${md(media.caption)}</div>` : "";
+      mdEl.innerHTML = (media.kind === "video"
+        ? `<video class="media" src="${media.url}" autoplay loop muted playsinline></video>`
+        : `<img class="media" src="${media.url}" alt="">`) + cap;
+    } else {
+      mdEl.innerHTML = md(state.display_markdown);
+    }
+  }
   renderMeters();
   renderLog();
   syncSliderLabels();

@@ -14,7 +14,7 @@ from typing import Any
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Response, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, Request, Response, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -109,6 +109,70 @@ async def set_mode(payload: ModePayload) -> dict[str, Any]:
     snap = sim.snapshot()
     await _broadcast(snap)
     return {"status": "SUCCESS", "current_state": snap}
+
+
+MEDIA_TYPES = {"image/png", "image/jpeg", "image/webp", "image/gif", "video/mp4", "video/webm"}
+MEDIA_MAX = 64 * 2**20
+FEED_TYPES = {"image/png", "image/jpeg", "image/webp"}
+
+
+async def _body(request: Request, allowed: set[str], limit: int) -> tuple[bytes, str]:
+    mime = (request.headers.get("content-type") or "").split(";")[0].strip().lower()
+    if mime not in allowed:
+        raise HTTPException(415, f"content-type must be one of {sorted(allowed)}")
+    data = bytearray()
+    async for chunk in request.stream():
+        data += chunk
+        if len(data) > limit:
+            raise HTTPException(413, f"over {limit // 2**20} MB")
+    if not data:
+        raise HTTPException(400, "empty body")
+    return bytes(data), mime
+
+
+@app.post("/api/v1/media")
+async def show_media(request: Request, caption: str = "") -> dict[str, Any]:
+    """Raw picture or video bytes (Content-Type image/* or video/mp4|webm) shown on the 27-inch screen."""
+    data, mime = await _body(request, MEDIA_TYPES, MEDIA_MAX)
+    snap = sim.show_media(data, mime, caption)
+    if snap is None:
+        raise HTTPException(409, "E-stop latched: reset mode before changing the screen")
+    await _broadcast(snap)
+    return {"status": "SUCCESS", "current_state": snap}
+
+
+@app.get("/api/v1/media/{media_id}")
+def get_media(media_id: int) -> Response:
+    m = sim.media
+    if not m or m["id"] != media_id:
+        raise HTTPException(404, "not on screen")
+    return Response(content=m["data"], media_type=m["mime"], headers={"Cache-Control": "no-store"})
+
+
+@app.delete("/api/v1/media")
+async def clear_media() -> dict[str, Any]:
+    sim.clear_media()
+    snap = sim.snapshot()
+    await _broadcast(snap)
+    return {"status": "SUCCESS", "current_state": snap}
+
+
+@app.post("/api/v1/camera/feed/{camera}")
+async def set_feed(camera: str, request: Request) -> dict[str, Any]:
+    """Stand a photo in for a camera (a receipt held up, a person at the desk): tests and demos without hardware."""
+    if camera not in ("bezel", "base"):
+        raise HTTPException(404, "camera is bezel or base")
+    data, _ = await _body(request, FEED_TYPES, 16 * 2**20)
+    sim.set_camera_feed(camera, data)
+    return {"status": "SUCCESS", "camera_feed": {k: v is not None for k, v in sim.camera_feed.items()}}
+
+
+@app.delete("/api/v1/camera/feed/{camera}")
+def clear_feed(camera: str) -> dict[str, Any]:
+    if camera not in ("bezel", "base"):
+        raise HTTPException(404, "camera is bezel or base")
+    sim.set_camera_feed(camera, None)
+    return {"status": "SUCCESS", "camera_feed": {k: v is not None for k, v in sim.camera_feed.items()}}
 
 
 @app.get("/api/v1/camera/frame")

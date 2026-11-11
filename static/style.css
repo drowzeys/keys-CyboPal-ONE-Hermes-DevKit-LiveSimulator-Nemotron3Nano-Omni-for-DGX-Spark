@@ -124,3 +124,6 @@ h2 { margin: 0 0 10px; font-size: 12px; letter-spacing: 0.14em; text-transform: 
   .grid { grid-template-columns: 1fr; grid-template-areas: "stage" "side" "cams" "log"; }
   .cams { grid-template-columns: 1fr; }
 }
+
+.glass .media { display: block; width: 100%; max-height: 360px; object-fit: contain; border-radius: 8px; background: #000; }
+.glass .media-caption { margin-top: 8px; color: var(--muted); font-size: 13px; }

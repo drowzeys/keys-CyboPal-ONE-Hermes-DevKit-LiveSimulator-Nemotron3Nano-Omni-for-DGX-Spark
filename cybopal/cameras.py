@@ -95,8 +95,29 @@ def _hud(frame: np.ndarray, sim: CyboPalSim, label: str) -> None:
     cv2.drawMarker(frame, (w // 2, h // 2), (90, 220, 180), cv2.MARKER_CROSS, 18, 1)
 
 
+def _feed(sim: CyboPalSim, camera: str, label: str, w: int, h: int) -> bytes | None:
+    """A camera feed attached through /api/v1/camera/feed (a photo standing in for the real camera), cropped to fill."""
+    data = sim.camera_feed.get(camera)
+    if not data:
+        return None
+    img = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)
+    if img is None:
+        return None
+    ih, iw = img.shape[:2]
+    s = max(w / iw, h / ih)
+    img = cv2.resize(img, (max(w, int(iw * s + 0.5)), max(h, int(ih * s + 0.5))), interpolation=cv2.INTER_AREA)
+    y0, x0 = (img.shape[0] - h) // 2, (img.shape[1] - w) // 2
+    frame = np.ascontiguousarray(img[y0:y0 + h, x0:x0 + w])
+    _hud(frame, sim, label + " · FEED")
+    ok, jpeg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 88])
+    return jpeg.tobytes() if ok else None
+
+
 def render_bezel(sim: CyboPalSim, w: int = 640, h: int = 480) -> bytes:
     sim.tick()
+    fed = _feed(sim, "bezel", "BEZEL CAM", w, h)
+    if fed:
+        return fed
     frame = _desk_scene(w, h)
     u, v = sim.project_user()
     # Apparent size from reach
@@ -121,6 +142,9 @@ def render_bezel(sim: CyboPalSim, w: int = 640, h: int = 480) -> bytes:
 def render_base(sim: CyboPalSim, w: int = 640, h: int = 480) -> bytes:
     """Upward-looking desk camera: arm silhouette + user from below."""
     sim.tick()
+    fed = _feed(sim, "base", "BASE CAM", w, h)
+    if fed:
+        return fed
     frame = np.full((h, w, 3), (22, 20, 26), dtype=np.uint8)
     # Ceiling wash
     cv2.circle(frame, (w // 2, 40), 220, (40, 36, 34), -1)

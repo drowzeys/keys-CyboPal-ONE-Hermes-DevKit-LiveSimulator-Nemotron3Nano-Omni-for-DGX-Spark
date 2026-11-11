@@ -94,6 +94,10 @@ class CyboPalSim:
             "- 27″ 4K main display\n- 3.5″ Pauli companion\n- 6-DOF arm, 700 mm reach"
         )
         self.pauli_text = "READY"
+        # a picture or video on the 27-inch screen (over the markdown) and camera feeds standing in for real cameras
+        self.media: dict[str, Any] | None = None
+        self.camera_feed: dict[str, bytes | None] = {"bezel": None, "base": None}
+        self._media_seq = 0
         self.safety = {"estop": False, "collision": False, "in_bounds": True}
         self.events: deque[Event] = deque(maxlen=120)
         self.started = time.time()
@@ -120,6 +124,9 @@ class CyboPalSim:
                 "user": {"x": round(self.user.x, 1), "y": round(self.user.y, 1), "z": round(self.user.z, 1)},
                 "user_in_frame": {"u": round(u, 1), "v": round(v, 1)},
                 "display_markdown": self.display_markdown,
+                "display_media": None if not self.media else {
+                    k: self.media[k] for k in ("id", "kind", "mime", "caption", "url", "bytes")},
+                "camera_feed": {k: v is not None for k, v in self.camera_feed.items()},
                 "pauli_text": self.pauli_text,
                 "safety": dict(self.safety),
                 "uptime_s": round(time.time() - self.started, 1),
@@ -207,6 +214,7 @@ class CyboPalSim:
                 changed.append(f"elbow={t.elbow:.1f}°")
             if display_markdown is not None:
                 self.display_markdown = display_markdown[:8000]
+                self.media = None  # new markdown replaces a picture or video
                 changed.append("main display")
             if pauli_text is not None:
                 self.pauli_text = pauli_text[:80]
@@ -219,6 +227,30 @@ class CyboPalSim:
             if changed:
                 self.log(source, " · ".join(changed))
             return self.snapshot()
+
+    def show_media(self, data: bytes, mime: str, caption: str = "") -> dict[str, Any] | None:
+        """Put a picture or video on the 27-inch screen. Refused (None) while E-stopped, like every other command."""
+        with self._lock:
+            if self.mode == "estop":
+                self.log("reject", "ESTOP latched — reset mode before changing the screen")
+                return None
+            self._media_seq += 1
+            kind = "video" if mime.startswith("video/") else "image"
+            self.media = {"id": self._media_seq, "kind": kind, "mime": mime, "caption": caption[:200], "data": data,
+                          "url": f"/api/v1/media/{self._media_seq}", "bytes": len(data)}
+            self.log("agent", f"main display · {kind} ({len(data) // 1024} KB){' · ' + caption[:60] if caption else ''}")
+            return self.snapshot()
+
+    def clear_media(self) -> None:
+        with self._lock:
+            if self.media:
+                self.media = None
+                self.log("agent", "main display · media cleared")
+
+    def set_camera_feed(self, camera: str, data: bytes | None) -> None:
+        with self._lock:
+            self.camera_feed[camera] = data
+            self.log("camera", f"{camera} camera · {'feed attached' if data else 'back to the simulated scene'}")
 
     def set_mode(self, mode: str) -> None:
         mode = mode.lower().strip()
